@@ -7,7 +7,7 @@ const AboutPage = () => {
       {/* Page Header */}
       <section className="bg-blue-50 py-16">
         <div className="container mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">About NexFix</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">About UrbanKart</h1>
           <p className="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">
             Your trusted partner in building, renovating, and perfecting your projects with high-quality supplies.
           </p>
@@ -20,14 +20,14 @@ const AboutPage = () => {
           <div className="md:w-1/2">
             <img 
               src="https://placehold.co/600x400/e2e8f0/334155?text=Our+Store" 
-              alt="NexFix Storefront" 
+              alt="UrbanKart Storefront" 
               className="rounded-lg shadow-2xl"
             />
           </div>
           <div className="md:w-1/2">
             <h2 className="text-3xl font-semibold text-gray-800 mb-4">Our Mission</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              At NexFix, our mission is to empower every builder, creator, and homeowner by providing an unparalleled selection of sanitary ware, hardware, and paints. We are committed to quality, affordability, and expert guidance, ensuring every project is a success.
+              At UrbanKart, our mission is to empower every builder, creator, and homeowner by providing an unparalleled selection of sanitary ware, hardware, and paints. We are committed to quality, affordability, and expert guidance, ensuring every project is a success.
             </p>
             <p className="text-gray-600 leading-relaxed">
               We believe in building lasting relationships with our customers by being the most reliable and knowledgeable source for all their project needs.

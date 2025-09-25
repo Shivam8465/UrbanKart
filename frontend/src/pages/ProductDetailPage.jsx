@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { allProducts } from '../data/products.js'; // Import from central data
+import { allProducts } from '../data/products.js';
+import StarRating from '../components/StarRating'; // Import the new component
 
 const ProductDetailPage = () => {
   const { productId } = useParams();
@@ -15,6 +16,11 @@ const ProductDetailPage = () => {
     setWasAdded(true);
     setTimeout(() => { setWasAdded(false); }, 1500);
   };
+
+  // Calculate average rating
+  const averageRating = product?.reviews.length > 0
+    ? product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length
+    : 0;
 
   if (!product) {
     return (
@@ -35,7 +41,14 @@ const ProductDetailPage = () => {
         </div>
         <div className="lg:w-1/2">
           <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{product.category}</span>
-          <h1 className="text-4xl font-bold text-gray-800 my-4">{product.name}</h1>
+          <h1 className="text-4xl font-bold text-gray-800 my-2">{product.name}</h1>
+          
+          {/* Average Rating */}
+          <div className="flex items-center gap-2 mb-4">
+            <StarRating rating={averageRating} />
+            <span className="text-gray-500">({product.reviews.length} reviews)</span>
+          </div>
+
           <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
           <div className="text-3xl font-bold text-blue-600 mb-8">
             ₹{product.price.toFixed(2)}
@@ -48,6 +61,27 @@ const ProductDetailPage = () => {
             {wasAdded ? 'Added to Cart!' : 'Add to Cart'}
           </button>
         </div>
+      </div>
+
+      {/* Customer Reviews Section */}
+      <div className="mt-16">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
+        {product.reviews.length > 0 ? (
+          <div className="space-y-6">
+            {product.reviews.map((review, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">{review.author}</span>
+                  <span className="text-sm text-gray-500">{review.date}</span>
+                </div>
+                <StarRating rating={review.rating} />
+                <p className="text-gray-600 mt-2">{review.comment}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">There are no reviews for this product yet.</p>
+        )}
       </div>
     </div>
   );
