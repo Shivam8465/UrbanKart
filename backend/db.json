@@ -1,0 +1,543 @@
+{
+  "users": [
+    {
+      "id": "1761741654602",
+      "name": "Shivam Singh",
+      "email": "shivamsingh08443@gmail.com",
+      "password": "$2b$10$fPqzZJ6ZKrmQIbzrSUsK2ud9x8s7ageaf.03l4MHocilW4OcF0rni",
+      "role": "admin",
+      "createdAt": "2025-10-29T12:40:54.602Z"
+    },
+    {
+      "id": "1761741715104",
+      "name": "sonu kumar",
+      "email": "jhasonu9876@gmail.com",
+      "password": "$2b$10$DUeNsXqy06aK5orGaS7BGuh2M.bGmhjH7xCKYpvD7rmuvUTGaj03a",
+      "role": "user",
+      "createdAt": "2025-10-29T12:41:55.104Z"
+    },
+    {
+      "id": "1761899549374",
+      "name": "karan singh",
+      "email": "karansingh08843@gmail.com",
+      "password": "$2b$10$JkzSnemo3P69tYXSIcx8Y.5IzZks5cL6DbDSK6HtNu8ZNuurtZtBG",
+      "role": "user",
+      "createdAt": "2025-10-31T08:32:29.374Z"
+    },
+    {
+      "id": "1761938838297",
+      "name": "neha kumar",
+      "email": "neha333@gmail.com",
+      "password": "$2b$10$C/54kNW8LG5UIFkNtgLHfu3DItHK6lW2O5yi5KgGv/c4bl3WrEcTm",
+      "role": "user",
+      "createdAt": "2025-10-31T19:27:18.297Z"
+    }
+  ],
+  "refreshTokens": [
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTAwMjE4LCJleHAiOjE3NjI1MDUwMTh9.cYD_x0QgPddjMK1gDf4xQnSmhl9e27nmdTPtJWGWU-g",
+      "createdAt": "2025-10-31T08:43:38.331Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTAwNDU4LCJleHAiOjE3NjI1MDUyNTh9.FtPi7Gysih67uKRwvB8bWcc29_TPsSuY4rnqAp_oRcA",
+      "createdAt": "2025-10-31T08:47:38.180Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDE4LCJleHAiOjE3NjI1NDI4MTh9.oNJYtO0nrtCa3E_ZhUttJ9l6xLKKj_tVOHJfU8_Dlsc",
+      "createdAt": "2025-10-31T19:13:38.676Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDI1LCJleHAiOjE3NjI1NDI4MjV9.egOn9FDgactLZZfxamfPCbj0FN4OUoStjAY2NKFQ8Rk",
+      "createdAt": "2025-10-31T19:13:45.846Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDMzLCJleHAiOjE3NjI1NDI4MzN9.LSwCC1brvntJyljdzK4BsSWAPQ8neB1V40zqpfLlYZ0",
+      "createdAt": "2025-10-31T19:13:53.546Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDUwLCJleHAiOjE3NjI1NDI4NTB9.QN5fj3GJhDhYp4u-extthU9CltMQPcLDn_K_yx6h6-Y",
+      "createdAt": "2025-10-31T19:14:10.268Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDUwLCJleHAiOjE3NjI1NDI4NTB9.QN5fj3GJhDhYp4u-extthU9CltMQPcLDn_K_yx6h6-Y",
+      "createdAt": "2025-10-31T19:14:10.751Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MDUwLCJleHAiOjE3NjI1NDI4NTB9.QN5fj3GJhDhYp4u-extthU9CltMQPcLDn_K_yx6h6-Y",
+      "createdAt": "2025-10-31T19:14:10.940Z"
+    },
+    {
+      "userId": "1761741715104",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE3MTUxMDQiLCJlbWFpbCI6ImpoYXNvbnU5ODc2QGdtYWlsLmNvbSIsImlhdCI6MTc2MTkzODA1OSwiZXhwIjoxNzYyNTQyODU5fQ.KLPWP_ytVAFQCdJ4ndteCGZc2oaMK84Uc3uRDLIEh30",
+      "createdAt": "2025-10-31T19:14:19.259Z"
+    },
+    {
+      "userId": "1761741715104",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE3MTUxMDQiLCJlbWFpbCI6ImpoYXNvbnU5ODc2QGdtYWlsLmNvbSIsImlhdCI6MTc2MTkzODA3MCwiZXhwIjoxNzYyNTQyODcwfQ.BDBMTdND1RX7e9y6yMsAN8SBqqjBRdQ6pRkgFS5IebM",
+      "createdAt": "2025-10-31T19:14:30.794Z"
+    },
+    {
+      "userId": "1761741715104",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE3MTUxMDQiLCJlbWFpbCI6ImpoYXNvbnU5ODc2QGdtYWlsLmNvbSIsImlhdCI6MTc2MTkzODA3MSwiZXhwIjoxNzYyNTQyODcxfQ.S8EQKLw0oNWhvKUN4fFy4u_zuuxh5iPY0MOGxv7efIs",
+      "createdAt": "2025-10-31T19:14:31.438Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MTU0LCJleHAiOjE3NjI1NDI5NTR9.h0mkiAMFX0u_UXkMTP3fSqm_yEZM7khfXw4Ncfytp1E",
+      "createdAt": "2025-10-31T19:15:54.628Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4MTU2LCJleHAiOjE3NjI1NDI5NTZ9.Tj4R_PnKJLrTlf2xZlbOlyMdwDCMZ_xqZLxVgWTchZM",
+      "createdAt": "2025-10-31T19:15:56.800Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYxOTM4ODgyLCJleHAiOjE3NjI1NDM2ODJ9.de9xmzLLKyeJ3HGVPZq3Rz5DIc-3Qf9QVwmxpwlhwtk",
+      "createdAt": "2025-10-31T19:28:02.161Z"
+    },
+    {
+      "userId": "1761741654602",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE3NDE2NTQ2MDIiLCJlbWFpbCI6InNoaXZhbXNpbmdoMDg0NDNAZ21haWwuY29tIiwiaWF0IjoxNzYyMDgwNDQ1LCJleHAiOjE3NjI2ODUyNDV9.9vF-uTVse6Wo_ZacbDBwL3OiKNyM0bvgC2zlCKCgij4",
+      "createdAt": "2025-11-02T10:47:25.623Z"
+    },
+    {
+      "userId": "1761899549374",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE4OTk1NDkzNzQiLCJlbWFpbCI6ImthcmFuc2luZ2gwODg0M0BnbWFpbC5jb20iLCJpYXQiOjE3NjIyNjczMDIsImV4cCI6MTc2Mjg3MjEwMn0.Ul0G-liHxEZgTvxKUe7VyvNjbpyIG8-U32BIdp9J1gU",
+      "createdAt": "2025-11-04T14:41:42.061Z"
+    },
+    {
+      "userId": "1761899549374",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE3NjE4OTk1NDkzNzQiLCJlbWFpbCI6ImthcmFuc2luZ2gwODg0M0BnbWFpbC5jb20iLCJpYXQiOjE3NjIyNzIxNDgsImV4cCI6MTc2Mjg3Njk0OH0.x5YhH-Ci2ctusFHnZJEI2Lf742TPnsyz1IVJCmFCook",
+      "createdAt": "2025-11-04T16:02:28.851Z"
+    }
+  ],
+  "carts": [
+    {
+      "userId": "1761741301734",
+      "items": []
+    },
+    {
+      "userId": "1761741654602",
+      "items": []
+    },
+    {
+      "userId": "1761741715104",
+      "items": []
+    },
+    {
+      "userId": "1761899549374",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 2
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "userId": "1761938838297",
+      "items": []
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-1761742159647",
+      "userId": "1761741715104",
+      "items": [
+        {
+          "productId": "p07",
+          "name": "Royal Blue Gloss Paint",
+          "price": 1750,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint+2",
+          "quantity": 1
+        },
+        {
+          "productId": "p08",
+          "name": "Hex Bolt Assortment Kit",
+          "price": 999,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Bolts",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "sonu kumar",
+        "phone": "8448637681",
+        "address": "13/119,trilokpuri,delhi-91",
+        "city": "new delhi",
+        "state": "Delhi",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 3598,
+      "status": "confirmed",
+      "paymentStatus": "pending",
+      "createdAt": "2025-10-29T12:49:19.647Z",
+      "updatedAt": "2025-10-31T08:26:35.137Z"
+    },
+    {
+      "id": "ORD-1761899327183",
+      "userId": "1761741715104",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        },
+        {
+          "productId": "p03",
+          "name": "Everlast Wall Paint - Silk White",
+          "price": 1550,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "sonu kumar",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 3698,
+      "status": "pending",
+      "paymentStatus": "pending",
+      "createdAt": "2025-10-31T08:28:47.183Z",
+      "updatedAt": "2025-10-31T08:28:47.183Z"
+    },
+    {
+      "id": "ORD-1761899573558",
+      "userId": "1761899549374",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        },
+        {
+          "productId": "p03",
+          "name": "Everlast Wall Paint - Silk White",
+          "price": 1550,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "karan singh",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 3698,
+      "status": "pending",
+      "paymentStatus": "pending",
+      "createdAt": "2025-10-31T08:32:53.558Z",
+      "updatedAt": "2025-10-31T08:32:53.558Z"
+    },
+    {
+      "id": "ORD-1761934779534",
+      "userId": "1761899549374",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "karan singh",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 2148,
+      "status": "pending",
+      "paymentStatus": "pending",
+      "createdAt": "2025-10-31T18:19:39.534Z",
+      "updatedAt": "2025-10-31T18:19:39.534Z"
+    },
+    {
+      "id": "ORD-1761937000125",
+      "userId": "1761899549374",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "karan singh",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 2148,
+      "status": "pending",
+      "paymentStatus": "pending",
+      "createdAt": "2025-10-31T18:56:40.125Z",
+      "updatedAt": "2025-10-31T18:56:40.125Z"
+    },
+    {
+      "id": "ORD-1761938862826",
+      "userId": "1761938838297",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        },
+        {
+          "productId": "p03",
+          "name": "Everlast Wall Paint - Silk White",
+          "price": 1550,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "neha kumar",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 3698,
+      "status": "processing",
+      "paymentStatus": "paid",
+      "createdAt": "2025-10-31T19:27:42.826Z",
+      "updatedAt": "2025-11-02T15:28:27.517Z"
+    },
+    {
+      "id": "ORD-1762080426485",
+      "userId": "1761899549374",
+      "items": [
+        {
+          "productId": "p01",
+          "name": "AquaFlow Premium Faucet",
+          "price": 1299,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+          "quantity": 1
+        },
+        {
+          "productId": "p02",
+          "name": "Titan Grip Steel Wrench",
+          "price": 849,
+          "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+          "quantity": 1
+        }
+      ],
+      "shippingAddress": {
+        "fullName": "YOGESH SINGH",
+        "phone": "08586865123",
+        "address": "13/123 TRILOK PURI",
+        "city": "Gonda",
+        "state": "UTTAR PRADESH",
+        "pincode": "110091"
+      },
+      "paymentMethod": "cod",
+      "totalAmount": 2148,
+      "status": "cancelled",
+      "paymentStatus": "pending",
+      "createdAt": "2025-11-02T10:47:06.485Z",
+      "updatedAt": "2025-11-02T15:28:05.980Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "p01",
+      "name": "AquaFlow Premium Faucet",
+      "price": 1299,
+      "category": "Sanitary",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Faucet",
+      "description": "A high-quality, chrome-finished faucet with dual-flow technology. Easy to install and built to last.",
+      "featured": true,
+      "reviews": [
+        {
+          "rating": 5,
+          "author": "John D.",
+          "date": "2025-08-15",
+          "comment": "Excellent quality and looks fantastic in my new bathroom."
+        },
+        {
+          "rating": 4,
+          "author": "Jane S.",
+          "date": "2025-08-12",
+          "comment": "Works great, but the installation was a bit tricky."
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "name": "Titan Grip Steel Wrench",
+      "price": 849,
+      "category": "Hardware",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Wrench",
+      "description": "Forged from high-carbon steel, this adjustable wrench provides maximum torque and grip.",
+      "featured": false,
+      "reviews": [
+        {
+          "rating": 5,
+          "author": "Mike R.",
+          "date": "2025-07-20",
+          "comment": "A solid, heavy-duty wrench. An essential for any toolbox."
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "name": "Everlast Wall Paint - Silk White",
+      "price": 1550,
+      "category": "Paints",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint",
+      "description": "A premium, low-VOC interior paint with a smooth silk finish. One coat provides excellent coverage.",
+      "featured": true,
+      "reviews": [
+        {
+          "rating": 5,
+          "author": "Sarah L.",
+          "date": "2025-09-01",
+          "comment": "Beautiful color and amazing coverage. Only needed one coat!"
+        },
+        {
+          "rating": 4,
+          "author": "Tom B.",
+          "date": "2025-08-25",
+          "comment": "Great paint, but has a strong smell for the first day."
+        }
+      ]
+    },
+    {
+      "id": "p04",
+      "name": "Solid Oak Vanity Cabinet",
+      "price": 8999,
+      "category": "Sanitary",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Cabinet",
+      "description": "A beautifully crafted solid oak vanity for modern bathrooms. Features soft-close drawers.",
+      "featured": true,
+      "reviews": []
+    },
+    {
+      "id": "p05",
+      "name": "Chrome Shower Head",
+      "price": 1899,
+      "category": "Sanitary",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Shower",
+      "description": "Experience a spa-like shower with 5 different spray settings. Made from rust-proof chrome.",
+      "featured": false,
+      "reviews": []
+    },
+    {
+      "id": "p06",
+      "name": "DrillMaster Pro 18V",
+      "price": 4500,
+      "category": "Hardware",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Drill",
+      "description": "A powerful and versatile 18V cordless drill. Comes with two batteries and a charger.",
+      "featured": true,
+      "reviews": []
+    },
+    {
+      "id": "p07",
+      "name": "Royal Blue Gloss Paint",
+      "price": 1750,
+      "category": "Paints",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Paint+2",
+      "description": "A vibrant, high-gloss enamel paint perfect for doors, trim, and furniture.",
+      "featured": false,
+      "reviews": []
+    },
+    {
+      "id": "p08",
+      "name": "Hex Bolt Assortment Kit",
+      "price": 999,
+      "category": "Hardware",
+      "image": "https://placehold.co/600x600/e2e8f0/334155?text=Bolts",
+      "description": "A 250-piece assortment of the most common hex bolts, nuts, and washers.",
+      "featured": false,
+      "reviews": []
+    }
+  ]
+}

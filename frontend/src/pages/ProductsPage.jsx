@@ -1,20 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import { allProducts } from '../data/products.js';
 import { ChevronDown } from 'lucide-react';
+
+// We NO LONGER import products from a local file.
 
 const ProductsPage = ({ searchQuery }) => {
   const { category } = useParams();
-  const [filteredProducts, setFilteredProducts] = useState([]);
   
-  // State for the sidebar filters
+  // This state will hold the original, unfiltered list of products from our server.
+  const [allProducts, setAllProducts] = useState([]); 
+  
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState(category ? category.charAt(0).toUpperCase() + category.slice(1) : 'All');
   const [priceFilter, setPriceFilter] = useState(10000);
-  
-  // State to control which accordion filter is open
   const [openFilter, setOpenFilter] = useState('category');
+  const [isLoading, setIsLoading] = useState(true); // Add a loading state
 
+  // This useEffect hook runs ONCE when the component loads.
+  // Its job is to fetch the data from our backend API.
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true); // Start loading
+      try {
+        // This is the API call to your backend server.
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        setAllProducts(data); // We store the original list of products in our state.
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+      setIsLoading(false); // Stop loading
+    };
+
+    fetchProducts();
+  }, []); // The empty array [] means this effect runs only once.
+
+  // This useEffect hook runs whenever a filter changes.
+  // It uses the `allProducts` state (which came from our server) as its source of truth.
   useEffect(() => {
     let products = allProducts;
     
@@ -31,7 +54,7 @@ const ProductsPage = ({ searchQuery }) => {
     products = products.filter(p => p.price <= priceFilter);
 
     setFilteredProducts(products);
-  }, [category, searchQuery, categoryFilter, priceFilter]);
+  }, [category, searchQuery, categoryFilter, priceFilter, allProducts]);
 
   const categories = ['All', 'Sanitary', 'Hardware', 'Paints'];
 
@@ -42,12 +65,10 @@ const ProductsPage = ({ searchQuery }) => {
         <p className="text-gray-500 mt-2">Browse our collection of high-quality items.</p>
       </div>
       <div className="flex flex-col md:flex-row gap-8">
-        {/* === NEW STYLISH SIDEBAR START === */}
         <aside className="w-full md:w-1/4 lg:w-1/5">
           <div className="bg-white p-4 rounded-lg shadow-md sticky top-24">
             <h3 className="text-xl font-semibold mb-4 px-2">Filters</h3>
             
-            {/* Category Filter Accordion */}
             <div className="border-t">
               <button 
                 onClick={() => setOpenFilter(openFilter === 'category' ? null : 'category')}
@@ -75,7 +96,6 @@ const ProductsPage = ({ searchQuery }) => {
               )}
             </div>
 
-            {/* Price Filter Accordion */}
             <div className="border-t">
               <button 
                 onClick={() => setOpenFilter(openFilter === 'price' ? null : 'price')}
@@ -100,10 +120,11 @@ const ProductsPage = ({ searchQuery }) => {
             </div>
           </div>
         </aside>
-        {/* === NEW STYLISH SIDEBAR END === */}
-
+        
         <main className="w-full md:w-3/4 lg:w-4/5">
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <p className="text-center text-gray-500 text-xl mt-8">Loading products...</p>
+          ) : filteredProducts.length > 0 ? (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={{...product, price: `₹${product.price}`}} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Search, User, Menu, X, LogOut } from "lucide-react";
+import { ShoppingCart, Search, User, Menu, X, LogOut, Shield } from "lucide-react";
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -42,15 +42,26 @@ export default function Header({ onSearchChange }) {
   return (
     <header className="sticky top-0 bg-white shadow-md z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        {/* NAME CHANGE */}
         <Link to="/" className="text-2xl font-bold text-blue-600">UrbanKart</Link>
         
-        {/* LAYOUT CHANGE: Moved Nav to the middle and Search to the right */}
         <nav className="hidden md:flex items-center gap-6 mx-auto">
           <Link to="/" className="hover:text-blue-600">Home</Link>
           <Link to="/products" className="hover:text-blue-600">Products</Link>
           <Link to="/about" className="hover:text-blue-600">About</Link>
           <Link to="/contact" className="hover:text-blue-600">Contact</Link>
+          <Link to="/orders" className="hover:text-blue-600">My Orders</Link>
+          <Link to="/profile" className="hover:text-blue-600">Profile</Link>
+          
+          {/* ADMIN LINK - ONLY SHOWS FOR ADMINS */}
+          {user?.role === 'admin' && (
+            <Link 
+              to="/admin" 
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-bold flex items-center gap-2"
+            >
+              <Shield className="w-4 h-4" />
+              Admin Panel
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -71,15 +82,23 @@ export default function Header({ onSearchChange }) {
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-2"><span className="text-sm">Hi, {user.name}</span><button onClick={handleLogout} className="hover:text-blue-600" title="Logout"><LogOut className="w-6 h-6" /></button></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Hi, {user.name}</span>
+              <button onClick={handleLogout} className="hover:text-blue-600" title="Logout">
+                <LogOut className="w-6 h-6" />
+              </button>
+            </div>
           ) : (
-            <Link to="/login" aria-label="Login or Signup" className="hover:text-blue-600"><User className="w-6 h-6" /></Link>
+            <Link to="/login" aria-label="Login or Signup" className="hover:text-blue-600">
+              <User className="w-6 h-6" />
+            </Link>
           )}
         </div>
         
-        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle mobile menu">{mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}</button>
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden focus:outline-none" aria-label="Toggle mobile menu">
+          {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+        </button>
       </div>
-      {/* ... (Mobile menu would also need updates) ... */}
     </header>
   );
 }

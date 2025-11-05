@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Plus, Minus, Trash2 } from 'lucide-react';
-
 const CartPage = () => {
   // Get everything we need from our cart context
   const { cartItems, addToCart, decreaseQuantity, removeFromCart, cartTotal } = useCart();
@@ -70,9 +69,11 @@ const CartPage = () => {
               <span>Total</span>
               <span>₹{cartTotal.toFixed(2)}</span>
             </div>
-            <button className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold">
-              Proceed to Checkout
-            </button>
+              <Link 
+     to="/checkout"
+     className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold block text-center"
+   >Proceed to Checkout
+   </Link>
           </div>
         </div>
 
