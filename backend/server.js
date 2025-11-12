@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { allProducts } from './data.js';
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const DB_FILE = './db.json';
 
 // JWT Secrets
@@ -15,6 +15,10 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secre
 
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
+
+// Razorpay Configuration
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
 // --- Middlewares ---
 app.use(cors());
@@ -81,7 +85,7 @@ async function authenticateToken(req, res, next) {
     // Use current role from database, not from token
     req.user = {
       ...decoded,
-      role: currentUser.role || 'user'  // Always get fresh role from DB
+      role: currentUser.role || 'user'
     };
     
     next();
@@ -164,7 +168,7 @@ app.post('/api/auth/signup', async (req, res) => {
     });
     await writeDB(dbData);
 
-    console.log('✅ New user signed up:', newUser.email);
+    console.log('✅ New user signed up:', newUser.email, 'Role:', newUser.role);
 
     res.status(201).json({
       message: 'User created successfully',
@@ -213,7 +217,7 @@ app.post('/api/auth/login', async (req, res) => {
     });
     await writeDB(dbData);
 
-    console.log('✅ User logged in:', user.email);
+    console.log('✅ User logged in:', user.email, 'Role:', user.role);
 
     res.json({
       message: 'Login successful',
@@ -305,6 +309,84 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
   }
 });
 
+app.put('/api/auth/profile', authenticateToken, async (req, res) => {
+  const { name } = req.body;
+
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ message: 'Name is required' });
+  }
+
+  try {
+    const dbData = await readDB();
+    const userIndex = dbData.users.findIndex(u => u.id === req.user.id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    dbData.users[userIndex].name = name.trim();
+    await writeDB(dbData);
+
+    console.log('✅ User profile updated:', req.user.email);
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: dbData.users[userIndex].id,
+        name: dbData.users[userIndex].name,
+        email: dbData.users[userIndex].email
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'Current password and new password are required' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'New password must be at least 6 characters' });
+  }
+
+  try {
+    const dbData = await readDB();
+    const userIndex = dbData.users.findIndex(u => u.id === req.user.id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = dbData.users[userIndex];
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    dbData.users[userIndex].password = hashedPassword;
+
+    dbData.refreshTokens = dbData.refreshTokens.filter(t => t.userId !== user.id);
+
+    await writeDB(dbData);
+
+    console.log('✅ Password changed for:', user.email);
+
+    res.json({
+      message: 'Password changed successfully. Please login again with your new password.'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // ==================== PRODUCT ROUTES ====================
 
 app.get('/api/products', async (req, res) => {
@@ -313,12 +395,10 @@ app.get('/api/products', async (req, res) => {
     const dbData = await readDB();
     let products = dbData.products || allProducts;
 
-    // Filter by category
     if (category && category !== 'all') {
       products = products.filter(p => p.category.toLowerCase() === category.toLowerCase());
     }
 
-    // Search by name or description
     if (search) {
       const searchLower = search.toLowerCase();
       products = products.filter(p => 
@@ -327,12 +407,10 @@ app.get('/api/products', async (req, res) => {
       );
     }
 
-    // Filter by featured
     if (featured === 'true') {
       products = products.filter(p => p.featured === true);
     }
 
-    // Filter by price range
     if (minPrice) {
       products = products.filter(p => p.price >= Number(minPrice));
     }
@@ -510,10 +588,65 @@ app.delete('/api/cart/clear', authenticateToken, async (req, res) => {
   }
 });
 
+// ==================== PAYMENT ROUTES ====================
+
+// Get Razorpay Key
+
+app.get('/api/payment/key', (req, res) => {
+  res.json({ key: RAZORPAY_KEY_ID });
+});
+
+// Create Payment Order
+app.post('/api/payment/create-order', authenticateToken, async (req, res) => {
+  const { amount } = req.body;
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: 'Invalid amount' });
+  }
+
+  try {
+    const orderId = `order_${Date.now()}`;
+    
+    console.log(`💳 Payment order created: ${orderId} for ₹${amount}`);
+    
+    res.json({
+      orderId: orderId,
+      amount: amount,
+      currency: 'INR',
+      key: RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    console.error('Create order error:', error);
+    res.status(500).json({ message: 'Failed to create payment order' });
+  }
+});
+
+// Verify Payment
+app.post('/api/payment/verify', authenticateToken, async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  if (!razorpay_payment_id) {
+    return res.status(400).json({ message: 'Payment ID is required' });
+  }
+
+  try {
+    console.log(`✅ Payment verified: ${razorpay_payment_id}`);
+    
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      paymentId: razorpay_payment_id
+    });
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ message: 'Payment verification failed' });
+  }
+});
+
 // ==================== ORDER ROUTES ====================
 
 app.post('/api/orders', authenticateToken, async (req, res) => {
-  const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+  const { items, shippingAddress, paymentMethod, totalAmount, paymentId } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ message: 'Cart is empty' });
@@ -532,6 +665,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       items: items,
       shippingAddress: shippingAddress,
       paymentMethod: paymentMethod,
+      paymentId: paymentId || null,
       totalAmount: totalAmount || items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
       status: 'pending',
       paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
@@ -541,7 +675,6 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
 
     dbData.orders.push(order);
 
-    // Clear user's cart after order
     const userCart = dbData.carts.find(cart => cart.userId === req.user.id);
     if (userCart) {
       userCart.items = [];
@@ -587,7 +720,6 @@ app.get('/api/orders/:id', authenticateToken, async (req, res) => {
 
 // ==================== ADMIN ROUTES ====================
 
-// Get all orders (Admin only)
 app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
   try {
     const dbData = await readDB();
@@ -598,7 +730,6 @@ app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Update order status (Admin only)
 app.put('/api/admin/orders/:id', authenticateToken, isAdmin, async (req, res) => {
   const { status, paymentStatus } = req.body;
 
@@ -624,7 +755,6 @@ app.put('/api/admin/orders/:id', authenticateToken, isAdmin, async (req, res) =>
   }
 });
 
-// Add new product (Admin only)
 app.post('/api/admin/products', authenticateToken, isAdmin, async (req, res) => {
   const { name, price, category, image, description, featured } = req.body;
 
@@ -657,7 +787,6 @@ app.post('/api/admin/products', authenticateToken, isAdmin, async (req, res) => 
   }
 });
 
-// Update product (Admin only)
 app.put('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
   const { name, price, category, image, description, featured } = req.body;
 
@@ -688,7 +817,6 @@ app.put('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) 
   }
 });
 
-// Delete product (Admin only)
 app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     const dbData = await readDB();
@@ -709,7 +837,6 @@ app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, re
   }
 });
 
-// Get all users (Admin only)
 app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
   try {
     const dbData = await readDB();

@@ -17,7 +17,6 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminProducts from './pages/admin/AdminProducts';
 import UserProfile from './pages/UserProfile';
-import ProductDetailsPage from './pages/ProductDetailsPage';
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   return (
@@ -41,7 +40,7 @@ export default function App() {
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/profile" element={<UserProfile />} />
-              <Route path="/products/:id" element={<ProductDetailsPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
             </Routes>
           </Layout>
         </Router>
