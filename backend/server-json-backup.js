@@ -1,15 +1,13 @@
-// backend/server-mongodb.js
-// This is your new server file with MongoDB integration
-
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs/promises';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { getDB, COLLECTIONS, connectDB } from './db.js';
 import { allProducts } from './data.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const DB_FILE = './db.json';
 
 // JWT Secrets
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
@@ -27,6 +25,27 @@ app.use(cors());
 app.use(express.json());
 
 // --- Helper Functions ---
+async function readDB() {
+  try {
+    const data = await fs.readFile(DB_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    const initialData = {
+      users: [],
+      refreshTokens: [],
+      carts: [],
+      orders: [],
+      products: allProducts
+    };
+    await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
+    return initialData;
+  }
+}
+
+async function writeDB(data) {
+  await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
+}
+
 function generateAccessToken(user) {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name, role: user.role || 'user' },
@@ -55,13 +74,15 @@ async function authenticateToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    const db = await getDB();
-    const currentUser = await db.collection(COLLECTIONS.USERS).findOne({ id: decoded.id });
+    // IMPORTANT: Fetch fresh user data from database to get current role
+    const dbData = await readDB();
+    const currentUser = dbData.users.find(u => u.id === decoded.id);
     
     if (!currentUser) {
       return res.status(403).json({ message: 'User not found' });
     }
     
+    // Use current role from database, not from token
     req.user = {
       ...decoded,
       role: currentUser.role || 'user'
@@ -87,7 +108,7 @@ function isAdmin(req, res, next) {
 // --- API Routes ---
 
 app.get('/', (req, res) => {
-  res.send('UrbanKart Backend API - MongoDB Edition 🚀');
+  res.send('UrbanKart Backend API - All Systems Active 🚀');
 });
 
 // ==================== AUTHENTICATION ROUTES ====================
@@ -109,12 +130,9 @@ app.post('/api/auth/signup', async (req, res) => {
   }
 
   try {
-    const db = await getDB();
+    const dbData = await readDB();
     
-    const userExists = await db.collection(COLLECTIONS.USERS).findOne({ 
-      email: email.toLowerCase() 
-    });
-    
+    const userExists = dbData.users.find(user => user.email.toLowerCase() === email.toLowerCase());
     if (userExists) {
       return res.status(409).json({ message: 'User with this email already exists' });
     }
@@ -130,22 +148,25 @@ app.post('/api/auth/signup', async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    await db.collection(COLLECTIONS.USERS).insertOne(newUser);
+    dbData.users.push(newUser);
     
     // Initialize empty cart for new user
-    await db.collection(COLLECTIONS.CARTS).insertOne({
+    dbData.carts.push({
       userId: newUser.id,
       items: []
     });
+    
+    await writeDB(dbData);
 
     const accessToken = generateAccessToken(newUser);
     const refreshToken = generateRefreshToken(newUser);
 
-    await db.collection(COLLECTIONS.REFRESH_TOKENS).insertOne({
+    dbData.refreshTokens.push({
       userId: newUser.id,
       token: refreshToken,
       createdAt: new Date().toISOString()
     });
+    await writeDB(dbData);
 
     console.log('✅ New user signed up:', newUser.email, 'Role:', newUser.role);
 
@@ -174,12 +195,9 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    const db = await getDB();
+    const dbData = await readDB();
     
-    const user = await db.collection(COLLECTIONS.USERS).findOne({ 
-      email: email.toLowerCase() 
-    });
-    
+    const user = dbData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -192,11 +210,12 @@ app.post('/api/auth/login', async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    await db.collection(COLLECTIONS.REFRESH_TOKENS).insertOne({
+    dbData.refreshTokens.push({
       userId: user.id,
       token: refreshToken,
       createdAt: new Date().toISOString()
     });
+    await writeDB(dbData);
 
     console.log('✅ User logged in:', user.email, 'Role:', user.role);
 
@@ -225,19 +244,16 @@ app.post('/api/auth/refresh', async (req, res) => {
   }
 
   try {
-    const db = await getDB();
+    const dbData = await readDB();
 
-    const tokenExists = await db.collection(COLLECTIONS.REFRESH_TOKENS).findOne({ 
-      token: refreshToken 
-    });
-    
+    const tokenExists = dbData.refreshTokens.find(t => t.token === refreshToken);
     if (!tokenExists) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
-    const user = await db.collection(COLLECTIONS.USERS).findOne({ id: decoded.id });
+    const user = dbData.users.find(u => u.id === decoded.id);
     if (!user) {
       return res.status(403).json({ message: 'User not found' });
     }
@@ -257,8 +273,9 @@ app.post('/api/auth/logout', authenticateToken, async (req, res) => {
   const { refreshToken } = req.body;
 
   try {
-    const db = await getDB();
-    await db.collection(COLLECTIONS.REFRESH_TOKENS).deleteOne({ token: refreshToken });
+    const dbData = await readDB();
+    dbData.refreshTokens = dbData.refreshTokens.filter(t => t.token !== refreshToken);
+    await writeDB(dbData);
 
     console.log('✅ User logged out:', req.user.email);
     res.json({ message: 'Logged out successfully' });
@@ -270,8 +287,8 @@ app.post('/api/auth/logout', authenticateToken, async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const db = await getDB();
-    const user = await db.collection(COLLECTIONS.USERS).findOne({ id: req.user.id });
+    const dbData = await readDB();
+    const user = dbData.users.find(u => u.id === req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -300,23 +317,24 @@ app.put('/api/auth/profile', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
-    
-    await db.collection(COLLECTIONS.USERS).updateOne(
-      { id: req.user.id },
-      { $set: { name: name.trim() } }
-    );
+    const dbData = await readDB();
+    const userIndex = dbData.users.findIndex(u => u.id === req.user.id);
 
-    const updatedUser = await db.collection(COLLECTIONS.USERS).findOne({ id: req.user.id });
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    dbData.users[userIndex].name = name.trim();
+    await writeDB(dbData);
 
     console.log('✅ User profile updated:', req.user.email);
 
     res.json({
       message: 'Profile updated successfully',
       user: {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email
+        id: dbData.users[userIndex].id,
+        name: dbData.users[userIndex].name,
+        email: dbData.users[userIndex].email
       }
     });
   } catch (error) {
@@ -337,12 +355,14 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
-    const user = await db.collection(COLLECTIONS.USERS).findOne({ id: req.user.id });
+    const dbData = await readDB();
+    const userIndex = dbData.users.findIndex(u => u.id === req.user.id);
 
-    if (!user) {
+    if (userIndex === -1) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    const user = dbData.users[userIndex];
 
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
@@ -350,13 +370,11 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
-    await db.collection(COLLECTIONS.USERS).updateOne(
-      { id: req.user.id },
-      { $set: { password: hashedPassword } }
-    );
+    dbData.users[userIndex].password = hashedPassword;
 
-    await db.collection(COLLECTIONS.REFRESH_TOKENS).deleteMany({ userId: user.id });
+    dbData.refreshTokens = dbData.refreshTokens.filter(t => t.userId !== user.id);
+
+    await writeDB(dbData);
 
     console.log('✅ Password changed for:', user.email);
 
@@ -374,32 +392,31 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
 app.get('/api/products', async (req, res) => {
   try {
     const { category, search, featured, minPrice, maxPrice } = req.query;
-    const db = await getDB();
-    
-    let query = {};
+    const dbData = await readDB();
+    let products = dbData.products || allProducts;
 
     if (category && category !== 'all') {
-      query.category = new RegExp(`^${category}$`, 'i');
+      products = products.filter(p => p.category.toLowerCase() === category.toLowerCase());
     }
 
     if (search) {
-      query.$or = [
-        { name: new RegExp(search, 'i') },
-        { description: new RegExp(search, 'i') }
-      ];
+      const searchLower = search.toLowerCase();
+      products = products.filter(p => 
+        p.name.toLowerCase().includes(searchLower) || 
+        p.description.toLowerCase().includes(searchLower)
+      );
     }
 
     if (featured === 'true') {
-      query.featured = true;
+      products = products.filter(p => p.featured === true);
     }
 
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+    if (minPrice) {
+      products = products.filter(p => p.price >= Number(minPrice));
     }
-
-    const products = await db.collection(COLLECTIONS.PRODUCTS).find(query).toArray();
+    if (maxPrice) {
+      products = products.filter(p => p.price <= Number(maxPrice));
+    }
 
     res.json(products);
   } catch (error) {
@@ -410,8 +427,9 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/products/:id', async (req, res) => {
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOne({ id: req.params.id });
+    const dbData = await readDB();
+    const products = dbData.products || allProducts;
+    const product = products.find(p => p.id === req.params.id);
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -428,12 +446,13 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.get('/api/cart', authenticateToken, async (req, res) => {
   try {
-    const db = await getDB();
-    let userCart = await db.collection(COLLECTIONS.CARTS).findOne({ userId: req.user.id });
+    const dbData = await readDB();
+    let userCart = dbData.carts.find(cart => cart.userId === req.user.id);
 
     if (!userCart) {
       userCart = { userId: req.user.id, items: [] };
-      await db.collection(COLLECTIONS.CARTS).insertOne(userCart);
+      dbData.carts.push(userCart);
+      await writeDB(dbData);
     }
 
     res.json({ items: userCart.items });
@@ -451,24 +470,25 @@ app.post('/api/cart/add', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOne({ id: productId });
+    const dbData = await readDB();
+    const products = dbData.products || allProducts;
+    const product = products.find(p => p.id === productId);
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    let userCart = await db.collection(COLLECTIONS.CARTS).findOne({ userId: req.user.id });
+    let userCart = dbData.carts.find(cart => cart.userId === req.user.id);
     
     if (!userCart) {
       userCart = { userId: req.user.id, items: [] };
-      await db.collection(COLLECTIONS.CARTS).insertOne(userCart);
+      dbData.carts.push(userCart);
     }
 
-    const existingItemIndex = userCart.items.findIndex(item => item.productId === productId);
+    const existingItem = userCart.items.find(item => item.productId === productId);
 
-    if (existingItemIndex >= 0) {
-      userCart.items[existingItemIndex].quantity += quantity;
+    if (existingItem) {
+      existingItem.quantity += quantity;
     } else {
       userCart.items.push({
         productId: product.id,
@@ -479,10 +499,7 @@ app.post('/api/cart/add', authenticateToken, async (req, res) => {
       });
     }
 
-    await db.collection(COLLECTIONS.CARTS).updateOne(
-      { userId: req.user.id },
-      { $set: { items: userCart.items } }
-    );
+    await writeDB(dbData);
 
     console.log(`✅ Added to cart: ${product.name} for user ${req.user.email}`);
     res.json({ message: 'Item added to cart', cart: userCart.items });
@@ -504,8 +521,8 @@ app.put('/api/cart/update', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
-    const userCart = await db.collection(COLLECTIONS.CARTS).findOne({ userId: req.user.id });
+    const dbData = await readDB();
+    const userCart = dbData.carts.find(cart => cart.userId === req.user.id);
 
     if (!userCart) {
       return res.status(404).json({ message: 'Cart not found' });
@@ -522,10 +539,7 @@ app.put('/api/cart/update', authenticateToken, async (req, res) => {
       }
     }
 
-    await db.collection(COLLECTIONS.CARTS).updateOne(
-      { userId: req.user.id },
-      { $set: { items: userCart.items } }
-    );
+    await writeDB(dbData);
 
     res.json({ message: 'Cart updated', cart: userCart.items });
   } catch (error) {
@@ -538,19 +552,15 @@ app.delete('/api/cart/remove/:productId', authenticateToken, async (req, res) =>
   const { productId } = req.params;
 
   try {
-    const db = await getDB();
-    const userCart = await db.collection(COLLECTIONS.CARTS).findOne({ userId: req.user.id });
+    const dbData = await readDB();
+    const userCart = dbData.carts.find(cart => cart.userId === req.user.id);
 
     if (!userCart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
 
     userCart.items = userCart.items.filter(item => item.productId !== productId);
-    
-    await db.collection(COLLECTIONS.CARTS).updateOne(
-      { userId: req.user.id },
-      { $set: { items: userCart.items } }
-    );
+    await writeDB(dbData);
 
     console.log(`✅ Removed from cart: ${productId} for user ${req.user.email}`);
     res.json({ message: 'Item removed from cart', cart: userCart.items });
@@ -562,12 +572,13 @@ app.delete('/api/cart/remove/:productId', authenticateToken, async (req, res) =>
 
 app.delete('/api/cart/clear', authenticateToken, async (req, res) => {
   try {
-    const db = await getDB();
-    
-    await db.collection(COLLECTIONS.CARTS).updateOne(
-      { userId: req.user.id },
-      { $set: { items: [] } }
-    );
+    const dbData = await readDB();
+    const userCart = dbData.carts.find(cart => cart.userId === req.user.id);
+
+    if (userCart) {
+      userCart.items = [];
+      await writeDB(dbData);
+    }
 
     console.log(`✅ Cart cleared for user ${req.user.email}`);
     res.json({ message: 'Cart cleared' });
@@ -579,10 +590,13 @@ app.delete('/api/cart/clear', authenticateToken, async (req, res) => {
 
 // ==================== PAYMENT ROUTES ====================
 
+// Get Razorpay Key
+
 app.get('/api/payment/key', (req, res) => {
   res.json({ key: RAZORPAY_KEY_ID });
 });
 
+// Create Payment Order
 app.post('/api/payment/create-order', authenticateToken, async (req, res) => {
   const { amount } = req.body;
 
@@ -607,6 +621,7 @@ app.post('/api/payment/create-order', authenticateToken, async (req, res) => {
   }
 });
 
+// Verify Payment
 app.post('/api/payment/verify', authenticateToken, async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -642,7 +657,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
+    const dbData = await readDB();
 
     const order = {
       id: `ORD-${Date.now()}`,
@@ -658,12 +673,14 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    await db.collection(COLLECTIONS.ORDERS).insertOne(order);
+    dbData.orders.push(order);
 
-    await db.collection(COLLECTIONS.CARTS).updateOne(
-      { userId: req.user.id },
-      { $set: { items: [] } }
-    );
+    const userCart = dbData.carts.find(cart => cart.userId === req.user.id);
+    if (userCart) {
+      userCart.items = [];
+    }
+
+    await writeDB(dbData);
 
     console.log(`✅ Order created: ${order.id} for user ${req.user.email}`);
     res.status(201).json({ message: 'Order placed successfully', order });
@@ -675,13 +692,10 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
 
 app.get('/api/orders', authenticateToken, async (req, res) => {
   try {
-    const db = await getDB();
-    const userOrders = await db.collection(COLLECTIONS.ORDERS)
-      .find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const dbData = await readDB();
+    const userOrders = dbData.orders.filter(order => order.userId === req.user.id);
 
-    res.json(userOrders);
+    res.json(userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
   } catch (error) {
     console.error('Get orders error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -690,11 +704,8 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
 
 app.get('/api/orders/:id', authenticateToken, async (req, res) => {
   try {
-    const db = await getDB();
-    const order = await db.collection(COLLECTIONS.ORDERS).findOne({ 
-      id: req.params.id,
-      userId: req.user.id 
-    });
+    const dbData = await readDB();
+    const order = dbData.orders.find(o => o.id === req.params.id && o.userId === req.user.id);
 
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
@@ -711,13 +722,8 @@ app.get('/api/orders/:id', authenticateToken, async (req, res) => {
 
 app.get('/api/admin/orders', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const db = await getDB();
-    const orders = await db.collection(COLLECTIONS.ORDERS)
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-    
-    res.json(orders);
+    const dbData = await readDB();
+    res.json(dbData.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
   } catch (error) {
     console.error('Get all orders error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -728,24 +734,21 @@ app.put('/api/admin/orders/:id', authenticateToken, isAdmin, async (req, res) =>
   const { status, paymentStatus } = req.body;
 
   try {
-    const db = await getDB();
-    
-    const updateFields = { updatedAt: new Date().toISOString() };
-    if (status) updateFields.status = status;
-    if (paymentStatus) updateFields.paymentStatus = paymentStatus;
+    const dbData = await readDB();
+    const order = dbData.orders.find(o => o.id === req.params.id);
 
-    const result = await db.collection(COLLECTIONS.ORDERS).findOneAndUpdate(
-      { id: req.params.id },
-      { $set: updateFields },
-      { returnDocument: 'after' }
-    );
-
-    if (!result) {
+    if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    console.log(`✅ Order updated: ${req.params.id}`);
-    res.json({ message: 'Order updated', order: result });
+    if (status) order.status = status;
+    if (paymentStatus) order.paymentStatus = paymentStatus;
+    order.updatedAt = new Date().toISOString();
+
+    await writeDB(dbData);
+
+    console.log(`✅ Order updated: ${order.id}`);
+    res.json({ message: 'Order updated', order });
   } catch (error) {
     console.error('Update order error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -760,7 +763,7 @@ app.post('/api/admin/products', authenticateToken, isAdmin, async (req, res) => 
   }
 
   try {
-    const db = await getDB();
+    const dbData = await readDB();
 
     const newProduct = {
       id: `p${Date.now()}`,
@@ -773,7 +776,8 @@ app.post('/api/admin/products', authenticateToken, isAdmin, async (req, res) => 
       reviews: []
     };
 
-    await db.collection(COLLECTIONS.PRODUCTS).insertOne(newProduct);
+    dbData.products.push(newProduct);
+    await writeDB(dbData);
 
     console.log(`✅ Product added: ${newProduct.name}`);
     res.status(201).json({ message: 'Product added', product: newProduct });
@@ -787,28 +791,26 @@ app.put('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) 
   const { name, price, category, image, description, featured } = req.body;
 
   try {
-    const db = await getDB();
-    
-    const updateFields = {};
-    if (name) updateFields.name = name;
-    if (price) updateFields.price = Number(price);
-    if (category) updateFields.category = category;
-    if (image) updateFields.image = image;
-    if (description !== undefined) updateFields.description = description;
-    if (featured !== undefined) updateFields.featured = featured;
+    const dbData = await readDB();
+    const productIndex = dbData.products.findIndex(p => p.id === req.params.id);
 
-    const result = await db.collection(COLLECTIONS.PRODUCTS).findOneAndUpdate(
-      { id: req.params.id },
-      { $set: updateFields },
-      { returnDocument: 'after' }
-    );
-
-    if (!result) {
+    if (productIndex === -1) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    console.log(`✅ Product updated: ${result.name}`);
-    res.json({ message: 'Product updated', product: result });
+    const product = dbData.products[productIndex];
+    
+    if (name) product.name = name;
+    if (price) product.price = Number(price);
+    if (category) product.category = category;
+    if (image) product.image = image;
+    if (description !== undefined) product.description = description;
+    if (featured !== undefined) product.featured = featured;
+
+    await writeDB(dbData);
+
+    console.log(`✅ Product updated: ${product.name}`);
+    res.json({ message: 'Product updated', product });
   } catch (error) {
     console.error('Update product error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -817,17 +819,18 @@ app.put('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) 
 
 app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOneAndDelete({ 
-      id: req.params.id 
-    });
+    const dbData = await readDB();
+    const productIndex = dbData.products.findIndex(p => p.id === req.params.id);
 
-    if (!product) {
+    if (productIndex === -1) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    console.log(`✅ Product deleted: ${product.name}`);
-    res.json({ message: 'Product deleted', product });
+    const deletedProduct = dbData.products.splice(productIndex, 1)[0];
+    await writeDB(dbData);
+
+    console.log(`✅ Product deleted: ${deletedProduct.name}`);
+    res.json({ message: 'Product deleted', product: deletedProduct });
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -836,10 +839,14 @@ app.delete('/api/admin/products/:id', authenticateToken, isAdmin, async (req, re
 
 app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const db = await getDB();
-    const users = await db.collection(COLLECTIONS.USERS)
-      .find({}, { projection: { password: 0 } })
-      .toArray();
+    const dbData = await readDB();
+    const users = dbData.users.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      createdAt: u.createdAt
+    }));
 
     res.json(users);
   } catch (error) {
@@ -850,6 +857,7 @@ app.get('/api/admin/users', authenticateToken, isAdmin, async (req, res) => {
 
 // ==================== REVIEW ROUTES ====================
 
+// Add review to product
 app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
   const { rating, comment } = req.body;
   const productId = req.params.id;
@@ -863,18 +871,22 @@ app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
   }
 
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOne({ id: productId });
+    const dbData = await readDB();
+    const productIndex = dbData.products.findIndex(p => p.id === productId);
 
-    if (!product) {
+    if (productIndex === -1) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    const product = dbData.products[productIndex];
+
+    // Check if user already reviewed this product
     const existingReview = product.reviews?.find(r => r.userId === req.user.id);
     if (existingReview) {
       return res.status(400).json({ message: 'You have already reviewed this product' });
     }
 
+    // Add review
     const newReview = {
       id: Date.now().toString(),
       userId: req.user.id,
@@ -884,10 +896,13 @@ app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
       date: new Date().toISOString()
     };
 
-    await db.collection(COLLECTIONS.PRODUCTS).updateOne(
-      { id: productId },
-      { $push: { reviews: newReview } }
-    );
+    if (!product.reviews) {
+      product.reviews = [];
+    }
+
+    product.reviews.push(newReview);
+
+    await writeDB(dbData);
 
     console.log(`✅ Review added to product ${productId} by ${req.user.email}`);
     res.status(201).json({ message: 'Review added successfully', review: newReview });
@@ -897,10 +912,11 @@ app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
   }
 });
 
+// Get product reviews
 app.get('/api/products/:id/reviews', async (req, res) => {
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOne({ id: req.params.id });
+    const dbData = await readDB();
+    const product = dbData.products.find(p => p.id === req.params.id);
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -913,31 +929,34 @@ app.get('/api/products/:id/reviews', async (req, res) => {
   }
 });
 
+// Delete review (user can only delete their own)
 app.delete('/api/products/:productId/reviews/:reviewId', authenticateToken, async (req, res) => {
   const { productId, reviewId } = req.params;
 
   try {
-    const db = await getDB();
-    const product = await db.collection(COLLECTIONS.PRODUCTS).findOne({ id: productId });
+    const dbData = await readDB();
+    const productIndex = dbData.products.findIndex(p => p.id === productId);
 
-    if (!product) {
+    if (productIndex === -1) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const review = product.reviews?.find(r => r.id === reviewId);
+    const product = dbData.products[productIndex];
+    const reviewIndex = product.reviews?.findIndex(r => r.id === reviewId);
 
-    if (!review) {
+    if (reviewIndex === -1 || reviewIndex === undefined) {
       return res.status(404).json({ message: 'Review not found' });
     }
 
+    const review = product.reviews[reviewIndex];
+
+    // Check if user owns this review or is admin
     if (review.userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'You can only delete your own reviews' });
     }
 
-    await db.collection(COLLECTIONS.PRODUCTS).updateOne(
-      { id: productId },
-      { $pull: { reviews: { id: reviewId } } }
-    );
+    product.reviews.splice(reviewIndex, 1);
+    await writeDB(dbData);
 
     console.log(`✅ Review deleted from product ${productId}`);
     res.json({ message: 'Review deleted successfully' });
@@ -949,22 +968,10 @@ app.delete('/api/products/:productId/reviews/:reviewId', authenticateToken, asyn
 
 // ==================== START SERVER ====================
 
-async function startServer() {
-  try {
-    await connectDB();
-    
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`✅ MongoDB connected`);
-      console.log(`✅ Authentication system active`);
-      console.log(`✅ Cart system active`);
-      console.log(`✅ Order system active`);
-      console.log(`✅ Admin panel active`);
-    });
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  }
-}
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`✅ Authentication system active`);
+  console.log(`✅ Cart system active`);
+  console.log(`✅ Order system active`);
+  console.log(`✅ Admin panel active`);
+});
