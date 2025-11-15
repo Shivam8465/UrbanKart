@@ -39,17 +39,18 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       // Fetch orders
-      const ordersRes = await fetch('http://localhost:5000/api/admin/orders', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const ordersRes = await fetch(`${API_URL}/admin/orders`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       const orders = ordersRes.ok ? await ordersRes.json() : [];
 
       // Fetch products
-      const productsRes = await fetch('http://localhost:5000/api/products');
+      const productsRes = await fetch(`${API_URL}/products`);;
       const products = productsRes.ok ? await productsRes.json() : [];
 
       // Fetch users
-      const usersRes = await fetch('http://localhost:5000/api/admin/users', {
+     const usersRes = await fetch(`${API_URL}/admin/users`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       const users = usersRes.ok ? await usersRes.json() : [];

@@ -46,7 +46,8 @@ const AdminProducts = () => {
     setDataLoading(true);
     try {
       console.log('🏷️ Fetching products...');
-      const response = await fetch('http://localhost:5000/api/products');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/products`);
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -98,9 +99,10 @@ const AdminProducts = () => {
     setSubmitting(true);
 
     try {
-      const url = editingProduct
-        ? `http://localhost:5000/api/admin/products/${editingProduct.id}`
-        : 'http://localhost:5000/api/admin/products';
+     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+     const url = editingProduct
+      ? `${API_URL}/admin/products/${editingProduct.id}`
+      : `${API_URL}/admin/products`;
 
       console.log('💾 Saving product:', formData);
 
@@ -139,7 +141,8 @@ const AdminProducts = () => {
 
     try {
       console.log('🗑️ Deleting product:', productId);
-      const response = await fetch(`http://localhost:5000/api/admin/products/${productId}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/admin/products/${productId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });

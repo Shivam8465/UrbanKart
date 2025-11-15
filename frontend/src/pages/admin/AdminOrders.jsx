@@ -38,7 +38,8 @@ const AdminOrders = () => {
     setDataLoading(true);
     try {
       console.log('📦 Fetching all orders...');
-      const response = await fetch('http://localhost:5000/api/admin/orders', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/admin/orders`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       
@@ -66,7 +67,8 @@ const AdminOrders = () => {
 
       console.log('🔄 Updating order:', orderId, body);
 
-      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}`, {
+     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+     const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
