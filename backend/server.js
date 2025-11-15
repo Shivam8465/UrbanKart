@@ -21,7 +21,14 @@ const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
 // --- Middlewares ---
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://urban-kart-356i.vercel.app',
+    'https://urban-kart-356i-4dvieicw8-shivam-singhs-projects-a68fa49b.vercel.app',
+    'http://localhost:5173'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // --- Helper Functions ---
@@ -30,15 +37,23 @@ async function readDB() {
     const data = await fs.readFile(DB_FILE, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
-    const initialData = {
-      users: [],
-      refreshTokens: [],
-      carts: [],
-      orders: [],
-      products: allProducts
-    };
-    await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
-    return initialData;
+    // Only create if file doesn't exist
+    if (error.code === 'ENOENT') {
+      console.log('📝 Creating new db.json file...');
+      const initialData = {
+        users: [],
+        refreshTokens: [],
+        carts: [],
+        orders: [],
+        products: allProducts
+      };
+      await fs.writeFile(DB_FILE, JSON.stringify(initialData, null, 2));
+      return initialData;
+    } else {
+      // If it's a parsing error or other error, throw it
+      console.error('❌ Error reading db.json:', error);
+      throw error;
+    }
   }
 }
 
