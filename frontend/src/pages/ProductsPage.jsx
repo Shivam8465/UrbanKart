@@ -24,7 +24,8 @@ const ProductsPage = ({ searchQuery }) => {
       setIsLoading(true); // Start loading
       try {
         // This is the API call to your backend server.
-        const response = await fetch('http://localhost:5000/api/products');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/products`);
         const data = await response.json();
         setAllProducts(data); // We store the original list of products in our state.
       } catch (error) {

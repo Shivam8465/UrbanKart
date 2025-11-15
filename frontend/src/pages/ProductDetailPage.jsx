@@ -29,7 +29,8 @@ const ProductDetailsPage = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+     const response = await fetch(`${API_URL}/products/${id}`);
       if (response.ok) {
         const data = await response.json();
         setProduct(data);
@@ -46,7 +47,8 @@ const ProductDetailsPage = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/products/${id}/reviews`);
       if (response.ok) {
         const data = await response.json();
         setReviews(data);
@@ -79,7 +81,8 @@ const ProductDetailsPage = () => {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const response = await fetch(`${API_URL}/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +115,8 @@ const ProductDetailsPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}/reviews/${reviewId}`, {
+   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const response = await fetch(`${API_URL}/products/${id}/reviews/${reviewId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${accessToken}`

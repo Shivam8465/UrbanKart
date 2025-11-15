@@ -49,7 +49,8 @@ const CheckoutPage = () => {
 
     try {
       // Create order on backend
-      const orderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const orderResponse = await fetch(`${API_URL}/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,8 @@ const CheckoutPage = () => {
         handler: async function (response) {
           // Payment successful - verify on backend
           try {
-            const verifyResponse = await fetch('http://localhost:5000/api/payment/verify', {
+           const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+           const verifyResponse = await fetch(`${API_URL}/payment/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -145,7 +147,8 @@ const CheckoutPage = () => {
         orderPayload.paymentId = paymentId;
       }
 
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/orders`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
